@@ -4,90 +4,88 @@
 /** @typedef {import('@adonisjs/framework/src/Response')} Response */
 /** @typedef {import('@adonisjs/framework/src/View')} View */
 
+const Address = use('App/Models/Address');
+
 /**
- * Resourceful controller for interacting with adresses
+ * Resourceful controller for interacting with addresses
  */
-class AdressController {
+class AddressController {
   /**
-   * Show a list of all adresses.
-   * GET adresses
+   * Show a list of all addresses.
+   * GET addresses
    *
    * @param {object} ctx
    * @param {Request} ctx.request
    * @param {Response} ctx.response
    * @param {View} ctx.view
    */
-  async index ({ request, response, view }) {
+  async index ({ request, response, auth }) {
+    const address = await Address.all()
+
+    return address;
   }
 
   /**
-   * Render a form to be used for creating a new adress.
-   * GET adresses/create
-   *
-   * @param {object} ctx
-   * @param {Request} ctx.request
-   * @param {Response} ctx.response
-   * @param {View} ctx.view
-   */
-  async create ({ request, response, view }) {
-  }
-
-  /**
-   * Create/save a new adress.
-   * POST adresses
+   * Create/save a new address.
+   * POST addresses
    *
    * @param {object} ctx
    * @param {Request} ctx.request
    * @param {Response} ctx.response
    */
   async store ({ request, response }) {
+    const data = request.only(["lng", "lat"]);
+    
+    const address = await Address.create(data);
+    
+    return address;
   }
 
   /**
-   * Display a single adress.
-   * GET adresses/:id
+   * Display a single address.
+   * GET addresses/:id
    *
    * @param {object} ctx
    * @param {Request} ctx.request
    * @param {Response} ctx.response
    * @param {View} ctx.view
    */
-  async show ({ params, request, response, view }) {
+  async show ({ params }) {
+    const address = await Address.findOrFail(params.id);
+
+    return address;
   }
 
   /**
-   * Render a form to update an existing adress.
-   * GET adresses/:id/edit
-   *
-   * @param {object} ctx
-   * @param {Request} ctx.request
-   * @param {Response} ctx.response
-   * @param {View} ctx.view
-   */
-  async edit ({ params, request, response, view }) {
-  }
-
-  /**
-   * Update adress details.
-   * PUT or PATCH adresses/:id
+   * Update address details.
+   * PUT or PATCH addresses/:id
    *
    * @param {object} ctx
    * @param {Request} ctx.request
    * @param {Response} ctx.response
    */
-  async update ({ params, request, response }) {
+  async update ({ params, request }) {
+    const address = await Address.findOrFail(params.id);
+    const data = request.only(["lgn", "lat"]);
+    
+    address.merge(data);
+    await address.save();
+    
+    return address
   }
 
   /**
-   * Delete a adress with id.
-   * DELETE adresses/:id
+   * Delete a address with id.
+   * DELETE addresses/:id
    *
    * @param {object} ctx
    * @param {Request} ctx.request
    * @param {Response} ctx.response
    */
-  async destroy ({ params, request, response }) {
+  async destroy ({ params }) {
+    const address = await Address.findOrFail(params.id);
+    await address.delete();
   }
 }
 
-module.exports = AdressController
+module.exports = AddressController

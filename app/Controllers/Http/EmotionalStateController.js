@@ -4,6 +4,7 @@
 /** @typedef {import('@adonisjs/framework/src/Response')} Response */
 /** @typedef {import('@adonisjs/framework/src/View')} View */
 
+const EmotionalState = use('App/Models/EmotionalState');
 /**
  * Resourceful controller for interacting with emotionalstates
  */
@@ -17,19 +18,14 @@ class EmotionalStateController {
    * @param {Response} ctx.response
    * @param {View} ctx.view
    */
-  async index ({ request, response, view }) {
-  }
+  async index ({ request, auth }) {
+    const user = await auth.getUser();
 
-  /**
-   * Render a form to be used for creating a new emotionalstate.
-   * GET emotionalstates/create
-   *
-   * @param {object} ctx
-   * @param {Request} ctx.request
-   * @param {Response} ctx.response
-   * @param {View} ctx.view
-   */
-  async create ({ request, response, view }) {
+    const emotional = await EmotionalState.query()
+      .where('user_id', user.id)
+      .fetch()
+
+    return emotional;
   }
 
   /**
@@ -40,7 +36,15 @@ class EmotionalStateController {
    * @param {Request} ctx.request
    * @param {Response} ctx.response
    */
-  async store ({ request, response }) {
+  async store ({ request, auth }) {
+    let data = request.only(["humor", "confident", "energy", "date", "description"]);
+    const user = await auth.getUser();
+    
+    data.user_id = user.id;
+
+    const emotional = await EmotionalState.create(data);
+
+    return emotional;
   }
 
   /**
@@ -52,19 +56,10 @@ class EmotionalStateController {
    * @param {Response} ctx.response
    * @param {View} ctx.view
    */
-  async show ({ params, request, response, view }) {
-  }
+  async show ({ params }) {
+    const emotional = await EmotionalState.findOrFail(params.id)
 
-  /**
-   * Render a form to update an existing emotionalstate.
-   * GET emotionalstates/:id/edit
-   *
-   * @param {object} ctx
-   * @param {Request} ctx.request
-   * @param {Response} ctx.response
-   * @param {View} ctx.view
-   */
-  async edit ({ params, request, response, view }) {
+    return emotional;
   }
 
   /**
@@ -75,7 +70,15 @@ class EmotionalStateController {
    * @param {Request} ctx.request
    * @param {Response} ctx.response
    */
-  async update ({ params, request, response }) {
+  async update ({ params, request }) {
+    const emotional = await EmotionalState.findOrFail(params.id);
+    const data = request.only(["humor", "confident", "energy", "date", "description"]);
+
+    emotional.merge(data);
+    await emotional.save();
+
+    return emotional;
+
   }
 
   /**
@@ -86,7 +89,11 @@ class EmotionalStateController {
    * @param {Request} ctx.request
    * @param {Response} ctx.response
    */
-  async destroy ({ params, request, response }) {
+  async destroy ({ params }) {
+    const emotional = await EmotionalState.findOrFail(params.id);
+    await emotional.delete();
+
+    return emotional;
   }
 }
 

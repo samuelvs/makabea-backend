@@ -5,7 +5,7 @@
 /** @typedef {import('@adonisjs/framework/src/View')} View */
 
 
-const User = user('App/Models/User');
+const User = use('App/Models/User');
 /**
  * Resourceful controller for interacting with users
  */

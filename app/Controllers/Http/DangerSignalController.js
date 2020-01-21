@@ -4,6 +4,7 @@
 /** @typedef {import('@adonisjs/framework/src/Response')} Response */
 /** @typedef {import('@adonisjs/framework/src/View')} View */
 
+const DangerSignal = use('App/Models/DangerSignal');
 /**
  * Resourceful controller for interacting with dangersignals
  */
@@ -17,30 +18,33 @@ class DangerSignalController {
    * @param {Response} ctx.response
    * @param {View} ctx.view
    */
-  async index ({ request, response, view }) {
+  async index ({ request, auth }) {
+    const user = await auth.getUser();
+    
+    const dangerSignals = await DangerSignal.query()
+      .where('user_id', user.id).fetch();
+
+    return dangerSignals;
   }
 
   /**
-   * Render a form to be used for creating a new dangersignal.
-   * GET dangersignals/create
-   *
-   * @param {object} ctx
-   * @param {Request} ctx.request
-   * @param {Response} ctx.response
-   * @param {View} ctx.view
-   */
-  async create ({ request, response, view }) {
-  }
+   * Create/save a new dangersignal.  async index ({ request }) {
 
-  /**
-   * Create/save a new dangersignal.
    * POST dangersignals
    *
    * @param {object} ctx
    * @param {Request} ctx.request
    * @param {Response} ctx.response
    */
-  async store ({ request, response }) {
+  async store ({ request, response, auth }) {
+    let data = request.only(["description", "order"]);
+    const user = await auth.getUser();
+    
+    data.user_id = user.id;
+
+    const signal = await DangerSignal.create(data);
+
+    return signal;
   }
 
   /**
@@ -52,19 +56,10 @@ class DangerSignalController {
    * @param {Response} ctx.response
    * @param {View} ctx.view
    */
-  async show ({ params, request, response, view }) {
-  }
+  async show ({ params }) {
+    const dangerSignal = await DangerSignal.findOrFail(params.id);
 
-  /**
-   * Render a form to update an existing dangersignal.
-   * GET dangersignals/:id/edit
-   *
-   * @param {object} ctx
-   * @param {Request} ctx.request
-   * @param {Response} ctx.response
-   * @param {View} ctx.view
-   */
-  async edit ({ params, request, response, view }) {
+    return dangerSignal;
   }
 
   /**
@@ -75,7 +70,14 @@ class DangerSignalController {
    * @param {Request} ctx.request
    * @param {Response} ctx.response
    */
-  async update ({ params, request, response }) {
+  async update ({ params, request }) {
+    const signal = await DangerSignal.findOrFail(params.id);
+    const data = request.only(["description"]);
+    
+    signal.merge(data);
+    await signal.save();
+    
+    return signal
   }
 
   /**
@@ -87,6 +89,10 @@ class DangerSignalController {
    * @param {Response} ctx.response
    */
   async destroy ({ params, request, response }) {
+    const signal = await DangerSignal.findOrFail(params.id);
+    await signal.delete();
+
+    return signal;
   }
 }
 
