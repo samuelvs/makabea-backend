@@ -5,16 +5,16 @@ const Schema = use('Schema')
 
 class AdressesSchema extends Schema {
   up () {
-    this.create('adresses', (table) => {
+    this.create('addresses', (table) => {
       table.increments()
-      table.decimal('lat').defaultTo(null)
-      table.decimal('lng').defaultTo(null)
+      table.decimal('lat').nullable()
+      table.decimal('lng').nullable()
       table.timestamps()
     })
   }
 
   down () {
-    this.drop('adresses')
+    this.drop('addresses')
   }
 }
 
