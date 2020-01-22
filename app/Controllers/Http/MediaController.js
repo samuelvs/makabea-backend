@@ -19,19 +19,9 @@ class MediaController {
    * @param {View} ctx.view
    */
   async index ({ request, response, view }) {
-    
-  }
+    const media = await Media.all();
 
-  /**
-   * Render a form to be used for creating a new media.
-   * GET media/create
-   *
-   * @param {object} ctx
-   * @param {Request} ctx.request
-   * @param {Response} ctx.response
-   * @param {View} ctx.view
-   */
-  async create ({ request, response, view }) {
+    return media;
   }
 
   /**
@@ -42,7 +32,12 @@ class MediaController {
    * @param {Request} ctx.request
    * @param {Response} ctx.response
    */
-  async store ({ request, response }) {
+  async store ({ request }) {
+    let data = request.only(["path", "type_id"]);
+
+    const media = await Media.create(data);
+
+    return media;
   }
 
   /**
@@ -54,19 +49,10 @@ class MediaController {
    * @param {Response} ctx.response
    * @param {View} ctx.view
    */
-  async show ({ params, request, response, view }) {
-  }
+  async show ({ params }) {
+    const media = await Media.findOrFail(params.id);
 
-  /**
-   * Render a form to update an existing media.
-   * GET media/:id/edit
-   *
-   * @param {object} ctx
-   * @param {Request} ctx.request
-   * @param {Response} ctx.response
-   * @param {View} ctx.view
-   */
-  async edit ({ params, request, response, view }) {
+    return media;
   }
 
   /**
@@ -77,7 +63,14 @@ class MediaController {
    * @param {Request} ctx.request
    * @param {Response} ctx.response
    */
-  async update ({ params, request, response }) {
+  async update ({ params, request }) {
+    const media = await Media.findOrFail(params.id);
+    const data = request.only(["path", "type_id"]);
+
+    media.merge(data);
+    await media.save();
+
+    return media;
   }
 
   /**
@@ -89,6 +82,10 @@ class MediaController {
    * @param {Response} ctx.response
    */
   async destroy ({ params, request, response }) {
+    const media = await Media.findOrFail(params.id);
+    await media.delete();
+
+    return media;
   }
 }
 
